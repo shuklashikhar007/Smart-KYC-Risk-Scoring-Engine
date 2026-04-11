@@ -1,8 +1,1 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Adding a custom subtle background color for the whole app */
-body {
-  @apply bg-slate-50;
-}
+@import "tailwindcss";
