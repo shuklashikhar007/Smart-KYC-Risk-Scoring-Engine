@@ -1,1 +1,51 @@
-<p>kyc-table works!</p>
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      
+      <thead>
+        <tr class="bg-slate-100 text-slate-600 text-sm uppercase tracking-wider">
+          <th class="p-4 font-semibold border-b">Customer ID</th>
+          <th class="p-4 font-semibold border-b text-center">Risk Score</th>
+          <th class="p-4 font-semibold border-b">Risk Tier</th>
+          <th class="p-4 font-semibold border-b">Decision</th>
+          <th class="p-4 font-semibold border-b">Key Risk Factors</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        @for (record of kycData; track record.customer_id) {
+          <tr class="border-b hover:bg-slate-50 transition-colors cursor-pointer">
+            
+            <td class="p-4 font-mono text-sm text-slate-700">{{ record.customer_id }}</td>
+            <td class="p-4 text-center font-bold text-slate-800">{{ record.risk_score }}</td>
+            
+            <td class="p-4">
+              <span class="px-3 py-1 text-xs font-bold rounded-full"
+                [class.bg-green-100]="record.risk_tier === 'LOW'"
+                [class.text-green-800]="record.risk_tier === 'LOW'"
+                [class.bg-yellow-100]="record.risk_tier === 'MEDIUM'"
+                [class.text-yellow-800]="record.risk_tier === 'MEDIUM'"
+                [class.bg-red-100]="record.risk_tier === 'HIGH'"
+                [class.text-red-800]="record.risk_tier === 'HIGH'">
+                {{ record.risk_tier }}
+              </span>
+            </td>
+            
+            <td class="p-4 font-semibold text-slate-700">{{ record.decision }}</td>
+            
+            <td class="p-4 text-sm text-slate-600 truncate max-w-xs">
+              {{ record.top_risk_factors }}
+            </td>
+            
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="p-8 text-center text-slate-400 italic">
+              No data loaded. Import a file to begin screening.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
