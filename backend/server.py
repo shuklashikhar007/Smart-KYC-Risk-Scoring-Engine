@@ -9,13 +9,13 @@ import numpy as np
 import joblib, json
 import shap
 import io, os
-import google.generativeai as genai
+from groq import Groq
 
 app = FastAPI(title="Smart KYC Risk Scoring Engine")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"], 
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,14 +28,16 @@ preprocessor = joblib.load('kyc_preprocessor.joblib')
 # Initialize SHAP explainer
 explainer = shap.TreeExplainer(rf_model)
 
-# Configure Gemini API
-api_key = os.environ.get("GEMINI_API_KEY")
+# Configure Groq API
+api_key = os.environ.get("GROQ_API_KEY")
 if not api_key:
-    print("WARNING: GEMINI_API_KEY environment variable not set. LLM explanations will fallback to raw features.")
-genai.configure(api_key=api_key)
+    print("WARNING: GROQ_API_KEY environment variable not set. LLM explanations will fallback to raw features.")
+    client = None
+else:
+    client = Groq(api_key=api_key)
 
-# We use gemini-1.5-flash as it is extremely fast and cost-effective for high-volume text tasks
-llm_model = genai.GenerativeModel('gemini-2.0-flash')
+# We use llama-3.1-8b-instant as it is extremely fast and cost-effective for high-volume text tasks
+GROQ_MODEL = 'llama-3.1-8b-instant'
 
 # Define column definitions matching the training environment
 id_col = 'customer_id'
@@ -76,15 +78,15 @@ def calculate_heuristic_score(df: pd.DataFrame) -> pd.Series:
     return score.clip(upper=100)
 
 def generate_llm_explanations(df_flagged: pd.DataFrame) -> dict:
-    """Batches flagged customers and asks Gemini to generate human-readable reasons."""
-    if df_flagged.empty or not api_key:
+    """Batches flagged customers and asks Groq to generate human-readable reasons."""
+    if df_flagged.empty or not client:
         return {}
     
     records = df_flagged[['customer_id', 'risk_tier', 'top_risk_factors']].to_dict(orient='records')
     llm_reasons = {}
     
-    # Process in batches of 50 to prevent LLM context overflow or missed outputs
-    chunk_size = 50
+    # Process in batches of 10 to prevent LLM context overflow or missed outputs
+    chunk_size = 10
     for i in range(0, len(records), chunk_size):
         chunk = records[i:i+chunk_size]
         
@@ -92,7 +94,8 @@ def generate_llm_explanations(df_flagged: pd.DataFrame) -> dict:
         You are an expert KYC (Know Your Customer) compliance officer. 
         I am providing a JSON list of flagged customers. It includes their risk tier and the raw machine learning features (SHAP) that drove their risk score.
         
-        Translate these raw features into a short, professional, human-readable sentence explaining why they were flagged. 
+        Translate these raw features into a detailed two lines, professional, human-readable sentence explaining why they were flagged. 
+        The reason should be atleast two lines or (20 words).
         
         Data to process:
         {json.dumps(chunk, indent=2)}
@@ -106,12 +109,23 @@ def generate_llm_explanations(df_flagged: pd.DataFrame) -> dict:
         """
         
         try:
-            # Force Gemini to return structured JSON
-            response = llm_model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
+            # Force Groq to return structured JSON
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful compliance assistant that outputs valid JSON."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model=GROQ_MODEL,
+                response_format={"type": "json_object"},
+                max_tokens=4000
             )
-            batch_result = json.loads(response.text)
+            batch_result = json.loads(chat_completion.choices[0].message.content)
             llm_reasons.update(batch_result)
         except Exception as e:
             print(f"LLM Batch Error: {e}")
@@ -138,8 +152,6 @@ async def health_check():
     Health check route: Used by load balancers and deployment orchestrators 
     (like Kubernetes) to ensure the server is alive.
     """
-    # In a more complex app, you might also check database connections here.
-    # For now, a simple HTTP 200 OK response with 'healthy' is perfect.
     return {"status": "healthy"}
 
 @app.post("/score")

@@ -1,8 +1,17 @@
-fastapi
-uvicorn
-python-multipart
+# Web Framework & Server
+fastapi==0.135.3
+python-multipart==0.0.26
+uvicorn==0.44.0
+
+# Environment
+dotenv==0.9.9
+
+# Data Science & ML
 pandas==2.2.2
 scikit-learn==1.6.1
-shap==0.51.0
+numpy==2.4.4
 joblib==1.5.3
-google-generativeai
+shap==0.51.0
+
+# Groq
+groq==1.1.2
