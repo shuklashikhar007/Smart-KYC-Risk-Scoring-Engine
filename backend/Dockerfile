@@ -5,6 +5,7 @@ COPY . /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 3000
+EXPOSE 8000
+
 # Run server
 CMD ["uvicorn", "server:app"]
