@@ -3,6 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import numpy as np
 import joblib, json
@@ -11,6 +12,14 @@ import io, os
 import google.generativeai as genai
 
 app = FastAPI(title="Smart KYC Risk Scoring Engine")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 1. Load ML Artifacts on Startup
 rf_model = joblib.load('kyc_rf_model.joblib')
