@@ -1,12 +1,14 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import { KycScoreRecord } from '../../models/kyc-score.model';
+import { KycScoreApiService } from '../../services/kyc-score-api.service';
 
 @Component({
   selector: 'app-import-panel',
-  standalone: true,
   imports: [CommonModule],
-  templateUrl: './import-panel.html'
+  templateUrl: './import-panel.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportPanel {
   fileName: string | null = null;
@@ -14,11 +16,10 @@ export class ImportPanel {
   isUploading = false;
   errorMessage: string | null = null;
 
-  // This EventEmitter sends the scored data back up to the parent app
-  @Output() dataScored = new EventEmitter<any[]>();
+  // Emits scored records to the parent app once backend processing succeeds.
+  readonly dataScored = output<KycScoreRecord[]>();
 
-  // Inject HttpClient to make API calls
-  constructor(private http: HttpClient) {}
+  constructor(private readonly kycScoreApiService: KycScoreApiService) {}
 
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
@@ -36,23 +37,16 @@ export class ImportPanel {
     this.isUploading = true;
     this.errorMessage = null;
 
-    // Package the file into FormData for the API
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-
-    // Make the POST request to your FastAPI backend
-    // IMPORTANT: Make sure your FastAPI server is running on port 8000!
-    this.http.post<any[]>('http://localhost:8000/score', formData)
+    this.kycScoreApiService.scoreCsv(this.selectedFile)
       .subscribe({
         next: (response) => {
           this.isUploading = false;
-          // Send the response data up to the parent component to render in the table
-          this.dataScored.emit(response); 
+          this.dataScored.emit(response);
         },
         error: (err) => {
           console.error('API Error:', err);
           this.isUploading = false;
-          this.errorMessage = "Failed to connect to backend. Is the Python server running?";
+          this.errorMessage = 'Failed to score CSV. Check backend URL and server status.';
         }
       });
   }

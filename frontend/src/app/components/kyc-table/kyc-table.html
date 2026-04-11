@@ -13,7 +13,7 @@
       </thead>
       
       <tbody>
-        @for (record of kycData; track record.customer_id) {
+        @for (record of kycData(); track record.customer_id) {
           <tr class="border-b hover:bg-slate-50 transition-colors cursor-pointer">
             
             <td class="p-4 font-mono text-sm text-slate-700">{{ record.customer_id }}</td>
@@ -33,7 +33,7 @@
             
             <td class="p-4 font-semibold text-slate-700">{{ record.decision }}</td>
             
-            <td class="p-4 text-sm text-slate-600 truncate max-w-xs">
+            <td class="p-4 text-sm text-slate-600 max-w-xs">
               {{ record.top_risk_factors }}
             </td>
             

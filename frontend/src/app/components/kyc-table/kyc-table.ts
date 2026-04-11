@@ -1,12 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+import { KycScoreRecord } from '../../models/kyc-score.model';
 
 @Component({
   selector: 'app-kyc-table',
-  standalone: true,
-  templateUrl: './kyc-table.html'
+  templateUrl: './kyc-table.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class KycTable {
-  // The @Input decorator tells Angular that this data will be handed down from the parent
-  // It starts as an empty array, and fills up when the API request succeeds
-  @Input() kycData: any[] = []; 
+  readonly kycData = input<KycScoreRecord[]>([]);
 }
