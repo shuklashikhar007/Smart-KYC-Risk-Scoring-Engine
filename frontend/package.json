@@ -1,42 +1,33 @@
 {
-  "name": "kyc-dashboard",
-  "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:kyc-dashboard": "node dist/kyc-dashboard/server/server.mjs"
-  },
-  "private": true,
-  "packageManager": "npm@10.9.3",
-  "dependencies": {
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/forms": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
-    "@angular/platform-server": "^21.2.0",
-    "@angular/router": "^21.2.0",
-    "@angular/ssr": "^21.2.7",
-    "express": "^5.1.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
-  },
-  "devDependencies": {
-    "@angular/build": "^21.2.7",
-    "@angular/cli": "^21.2.7",
-    "@angular/compiler-cli": "^21.2.0",
-    "@tailwindcss/postcss": "^4.1.12",
-    "@types/express": "^5.0.1",
-    "@types/node": "^20.17.19",
-    "autoprefixer": "^10.4.27",
-    "jsdom": "^28.0.0",
-    "postcss": "^8.5.9",
-    "prettier": "^3.8.1",
-    "tailwindcss": "^3.4.19",
-    "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
-  }
+    "name": "frontend",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc -b && vite build",
+        "lint": "eslint .",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@tailwindcss/vite": "^4.2.2",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
+        "react-router": "^7.14.0",
+        "tailwindcss": "^4.2.2"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.4",
+        "@types/node": "^24.12.2",
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^6.0.1",
+        "eslint": "^9.39.4",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-refresh": "^0.5.2",
+        "globals": "^17.4.0",
+        "typescript": "~6.0.2",
+        "typescript-eslint": "^8.58.0",
+        "vite": "^8.0.4"
+    }
 }
