@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-multipart
+pandas==2.2.2
+scikit-learn==1.6.1
+shap==0.51.0
+joblib==1.5.3
